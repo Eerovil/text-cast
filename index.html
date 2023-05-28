@@ -55,7 +55,7 @@ window.onload = function() {
 
 if (window.location.href.indexOf('localhost') == -1) {
     const context = cast.framework.CastReceiverContext.getInstance();
-    context.addCustomMessageListener('urn:x-cast:com.eerovil.chromecast-dashboard', function (customEvent) {
+    context.addCustomMessageListener('urn:x-cast:com.eerovil.text-cast', function (customEvent) {
         if (customEvent.data.type == "fullDataJSON") {
             const data = JSON.parse(customEvent.data.text);
             for (const key in data) {
