@@ -85,8 +85,11 @@
         };
 
         window['__onGCastApiAvailable'] = function (isAvailable) {
+            console.log("isAvailable: ", isAvailable)
             if (isAvailable) {
-                initializeCastApi();
+                setTimeout(() => {
+                    initializeCastApi();
+                }, 1000)
             }
         };
 
