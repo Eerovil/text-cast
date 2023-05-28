@@ -1,0 +1,124 @@
+<html>
+
+<head>
+    <title>Text cast</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Cloudflare Web Analytics -->
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
+        data-cf-beacon='{"token": "434bcffbc07f408a9b95d8fd1f9fbaf1"}'></script><!-- End Cloudflare Web Analytics -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"
+        integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ=="
+        crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <style>
+        .content-wrapper {
+            margin: 0 auto;
+            max-width: 800px;
+            height: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        #text {
+            width: 100%;
+            font-size: 36px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="vue-app">
+        <div style="display: flex; justify-content: flex-end; flex-wrap: wrap;">
+            <div style="width: 50px; height: 50px;">
+                <google-cast-launcher></google-cast-launcher>
+            </div>
+        </div>
+        <hr>
+        <div class="content-wrapper">
+            <h2>Text</h2>
+            <button @click="dataToSend.allCaps = !dataToSend.allCaps">{{ dataToSend.allCaps ? 'Isot' : 'Pienet' }}</button>
+            <input ref="textInputEl" v-model="dataToSend.typedText" type="text" id="text" value="Hello world!"
+                @click="selecAllText" >
+        </div>
+
+    </div>
+    <script>
+
+        new Vue({
+            el: "#vue-app",
+
+            data: () => ({
+                dataToSend: {
+                    typedText: "Hello world!",
+                    allCaps: false,
+                }
+            }),
+
+            methods: {
+                selecAllText() {
+                    this.$refs.textInputEl.select();
+                },
+                send() {
+                    window.sendAllData();
+                }
+            },
+
+            watch: {
+                dataToSend: {
+                    handler: function (val, oldVal) {
+                        this.send();
+                    },
+                    deep: true
+                }
+            }
+        })
+
+        initializeCastApi = function () {
+            cast.framework.CastContext.getInstance().setOptions({
+                receiverApplicationId: 'AC14F871',
+                autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+            });
+        };
+
+        window['__onGCastApiAvailable'] = function (isAvailable) {
+            if (isAvailable) {
+                initializeCastApi();
+            }
+        };
+
+        function send() {
+            var textEl = document.getElementById("text");
+            sendText(textEl.value);
+        }
+
+        function sendText(txt) {
+            var castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+            if (castSession) {
+                castSession.sendMessage('urn:x-cast:com.eerovil.chromecast-dashboard', {
+                    type: "message",
+                    text: txt
+                });
+            }
+        }
+
+        function sendAllData() {
+            var vueEl = document.querySelector('#vue-app')
+            var castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+            var dataToSend = JSON.stringify(vueEl.__vue__.dataToSend);
+            console.log("dataToSend: ", dataToSend)
+            if (castSession) {
+                castSession.sendMessage('urn:x-cast:com.eerovil.chromecast-dashboard', {
+                    type: "fullDataJSON",
+                    text: dataToSend,
+                });
+            }
+        }
+
+    </script>
+</body>
+
+</html>
